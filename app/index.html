@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Chaos Feild</title>
+    <link rel="stylesheet" href="style.css">    
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"></script>
+  </head>
+  <body>
+    <img id='test' width='128' height='128' src='https://avatars.githubusercontent.com/u/73334068?s=400&u=950ed73aba0ea7dac49c153f79ba150bfee700d4&v=4' crossorigin="anonymous"/>
+    <video id='video' autoplay width='128px' height='128px'></video>
+    <button id='start' disabled='disabled'>Start</button>
+    <button id='stop' disabled='disabled'>Stop</button>
+    <canvas id="canvas" width='128' heigh='128'></canvas>
+  </body>
+  <script type='text/javascript'>
+    const screen = document.getElementById('video');
+    const start = document.getElementById('start');
+    const stop = document.getElementById('stop');
+    const img = document.getElementById('test');
+    
+    let target = null;
+    let model = null;
+    let id = null;
+
+    async function setModel() {
+      model = await tf.loadGraphModel("https://tfhub.dev/google/tfjs-model/imagenet/mobilenet_v2_075_128/feature_vector/2/default/1", { fromTFHub: true })
+      target = getFeature(img);
+
+      start.disabled = false;
+      stop.disabled = false;
+    };
+    setModel();
+    function getFeature(input) {
+      let tfimg = tf.cast(tf.browser.fromPixels(input), 'float32');
+      tfimg = tfimg.reshape([1, ...tfimg.shape]); 
+      const featrue = model.execute(tfimg);
+
+      return featrue;
+    }
+    function getSimilarty(input) {
+      const dot = tf.dot(target, tf.transpose(input));
+      const a = tf.sqrt(tf.dot(target, tf.transpose(target)));
+      const b = tf.sqrt(tf.dot(input, tf.transpose(input)));
+      const sim = dot.div(a.mul(b));
+
+      return sim.dataSync();
+    }
+    
+    function getImgFromVideo() {
+      const ctx = document.getElementById('canvas').getContext('2d');
+      ctx.drawImage(video, 0, 0, 128, 128);
+
+      const capture = ctx.getImageData(0, 0, 128, 128);
+      console.log(capture)
+
+      return capture;
+    }
+
+    function check() {
+      const feature = getFeature(getImgFromVideo());
+      const sim = getSimilarty(feature);
+
+      console.log(sim);
+    }
+    async function startCapture() {
+      let captureStream = null;
+
+      const option = {
+        audio: false,
+        displaySurface: 'application',
+        video: { 
+          cursor: 'always',
+        }
+      };
+
+      try {
+        captureStream = await navigator.mediaDevices.getDisplayMedia(option);
+        screen.srcObject = captureStream;
+
+        id = setInterval(check, 1000);
+      } catch (err) {
+        console.log(err);
+      }
+
+      return captureStream;
+    }
+    function stopCapture() {
+      const tracks = screen.srcObject.getTracks();
+      tracks.forEach(track => track.stop());
+      screen.srcObject = null;
+
+      clearInterval(id);
+    }
+    start.addEventListener('click', startCapture);
+    stop.addEventListener('click', stopCapture);
+
+  </script>
+</html>
