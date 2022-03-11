@@ -7,7 +7,7 @@
     <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"></script>
   </head>
   <body>
-    <img id='test' width='128' height='128' src='https://avatars.githubusercontent.com/u/73334068?s=400&u=950ed73aba0ea7dac49c153f79ba150bfee700d4&v=4' crossorigin="anonymous"/>
+    <img id='test' width='128' height='128' src='https://raw.githubusercontent.com/Komponent1/chaosfield/master/app/coeruco.png' crossorigin="anonymous"/>
     <button id='start' disabled='disabled'>Start</button>
     <button id='stop' disabled='disabled'>Stop</button>
     <canvas id="canvas2"></canvas>
@@ -54,7 +54,7 @@
       canvas1.height = screen.videoHeight;
       ctx1.drawImage(screen, 0, 0, screen.videoWidth, screen.videoHeight);
 
-      const capture = ctx1.getImageData([...position]);
+      const capture = ctx1.getImageData(...position);
       const canvas2 = document.getElementById('canvas2');
       const ctx2 = canvas2.getContext('2d');
       canvas2.width = screen.videoWidth;
@@ -65,7 +65,7 @@
     }
 
     function check() {
-      const feature = getFeature(getImgFromVideo());
+      const feature = getFeature(getImgFromVideo([958, 234, 128, 128]));
       const sim = getSimilarty(feature);
 
       console.log(sim);
