@@ -3,15 +3,15 @@
   <head>
     <meta charset="utf-8">
     <title>Chaos Feild</title>
-    <link rel="stylesheet" href="style.css">    
+    <link rel="stylesheet" href="style.css"> 
     <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"></script>
   </head>
   <body>
     <img id='test' width='128' height='128' src='https://avatars.githubusercontent.com/u/73334068?s=400&u=950ed73aba0ea7dac49c153f79ba150bfee700d4&v=4' crossorigin="anonymous"/>
-    <video id='video' autoplay width='128px' height='128px'></video>
     <button id='start' disabled='disabled'>Start</button>
     <button id='stop' disabled='disabled'>Stop</button>
-    <canvas id="canvas" width='128' heigh='128'></canvas>
+    <canvas id="canvas2"></canvas>
+    <video id='video' autoplay ></video>
   </body>
   <script type='text/javascript'>
     const screen = document.getElementById('video');
@@ -47,12 +47,19 @@
       return sim.dataSync();
     }
     
-    function getImgFromVideo() {
-      const ctx = document.getElementById('canvas').getContext('2d');
-      ctx.drawImage(video, 0, 0, 128, 128);
+    function getImgFromVideo(position) {
+      const canvas1 = document.createElement('canvas');
+      const ctx1 = canvas1.getContext('2d');
+      canvas1.width = screen.videoWidth;
+      canvas1.height = screen.videoHeight;
+      ctx1.drawImage(screen, 0, 0, screen.videoWidth, screen.videoHeight);
 
-      const capture = ctx.getImageData(0, 0, 128, 128);
-      console.log(capture)
+      const capture = ctx1.getImageData([...position]);
+      const canvas2 = document.getElementById('canvas2');
+      const ctx2 = canvas2.getContext('2d');
+      canvas2.width = screen.videoWidth;
+      canvas2.height = screen.videoHeight;
+      ctx2.putImageData(capture, 0, 0);
 
       return capture;
     }
